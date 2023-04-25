@@ -188,7 +188,9 @@ export const VideoPlayer = React.memo(
 );
 
 function IconBtn({ children }) {
-  return <TouchableOpacity>{children}</TouchableOpacity>;
+  return (
+    <TouchableOpacity style={styles.iconContainer}>{children}</TouchableOpacity>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -227,6 +229,13 @@ const styles = StyleSheet.create({
     bottom: 10,
     paddingHorizontal: 24,
     paddingVertical: 12,
+  },
+  iconContainer: {
+    height: 36,
+    width: 36,
+    borderRadius: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   channel: { fontWeight: 'bold', fontSize: 16, marginBottom: 12 },
   buttons: {

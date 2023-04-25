@@ -159,13 +159,13 @@ export const VideoPlayer = React.memo(
         {/* buttons */}
         <View style={styles.btnsContainer}>
           <IconBtn>
-            <AntDesign name='like2' size={36} color='white' />
+            <AntDesign name='like2' size={28} color='white' />
           </IconBtn>
           <IconBtn>
-            <AntDesign name='dislike2' size={36} color='white' />
+            <AntDesign name='dislike2' size={28} color='white' />
           </IconBtn>
           <IconBtn>
-            <Entypo name='share' size={36} color='white' />
+            <Entypo name='share' size={28} color='white' />
           </IconBtn>
         </View>
 

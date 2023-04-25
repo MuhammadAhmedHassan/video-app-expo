@@ -100,8 +100,8 @@ export const VideoPlayer = React.memo(
       }, 1000);
 
       // Use delay to wait for 1 second before hiding the icon
-      opacity.value = withDelay(50, withSpring(1, {}));
-      scale.value = withDelay(50, withSpring(1, {}));
+      opacity.value = withDelay(20, withSpring(1, {}));
+      scale.value = withDelay(20, withSpring(1, {}));
     };
 
     const style = useAnimatedStyle(() => {

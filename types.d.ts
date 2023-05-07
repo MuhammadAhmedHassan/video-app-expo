@@ -2,6 +2,15 @@ declare module '*.mp4';
 
 interface IVideo {
   id: number;
+  description: string;
+  sources: string;
+  subtitle: string;
+  thumb: string;
+  title: string;
+}
+
+interface IVideoOld {
+  id: number;
   contest_id: string;
   user_id: string;
   title: string;

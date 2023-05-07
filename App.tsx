@@ -1,19 +1,19 @@
+import { useCallback, useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
-  StyleSheet,
   SafeAreaView,
   StatusBar,
-  ViewToken,
+  StyleSheet,
   View,
-  ActivityIndicator,
+  ViewToken,
 } from 'react-native';
-import { useCallback, useEffect, useState } from 'react';
 import { VideoPlayer } from './components';
 import data from './data.json';
 
 const keyExtractor = (item: IVideo) => item.id.toString();
 
-export default function App() {
+export default function VideoApp() {
   const [current, setCurrent] = useState(data[0].id);
 
   const [videos, setVideos] = useState([]);
@@ -52,13 +52,15 @@ export default function App() {
   }, []);
 
   const renderItem = useCallback(
-    ({ item, index }) => {
+    ({ item }: { item: IVideo; index: number }) => {
       return (
         <VideoPlayer
           id={item.id}
-          videoUri={item.media_path}
-          showThumbnail={current === item.id ? index + 1 : index}
-          thumbnail={item.thumbnail}
+          videoUri={item.sources}
+          title={item.title}
+          description={item.description}
+          showThumbnail={current === item.id}
+          thumbnail={item.thumb}
           playVideo={current === item.id}
         />
       );
@@ -119,6 +121,12 @@ function ListFooterComponent({ loading }) {
     </View>
   );
 }
+
+// export default function App() {
+//   <Provider store={store}>
+//     <VideoApp />
+//   </Provider>;
+// }
 
 const styles = StyleSheet.create({
   container: {

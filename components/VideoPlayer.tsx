@@ -1,79 +1,79 @@
+import { AVPlaybackStatus, ResizeMode, Video } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
+  Dimensions,
   StyleSheet,
   Text,
-  View,
-  Dimensions,
-  Button,
   TouchableOpacity,
-  Image,
-  ImageBackground,
-  ActivityIndicator,
+  View,
 } from 'react-native';
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import {
-  Video,
-  ResizeMode,
-  AVPlaybackStatus,
-  AVPlaybackStatusSuccess,
-} from 'expo-av';
-import * as FileSystem from 'expo-file-system';
 import Animated, {
-  useSharedValue,
-  withTiming,
   useAnimatedStyle,
-  Easing,
-  useValue,
-  interpolate,
-  withSpring,
+  useSharedValue,
   withDelay,
+  withSpring,
 } from 'react-native-reanimated';
 
 import { AntDesign, Entypo, MaterialIcons } from '@expo/vector-icons';
-import localVideo from '../download.mp4';
-import { VideoThumbnail } from './VideoThumbnail';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface IProps {
   id: number;
   videoUri: string;
+  title: string;
+  description: string;
   thumbnail: string;
   showThumbnail: boolean;
   playVideo: boolean;
 }
 
 export const VideoPlayer = React.memo(
-  ({ id, showThumbnail, thumbnail, videoUri, playVideo }: IProps) => {
+  ({ id, videoUri, title, description, playVideo }: IProps) => {
     const video = useRef<Video | null>(null);
     const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
     const [videoStatus, setVideoStatus] = useState(null);
+    const filePath = useMemo(
+      () => FileSystem.cacheDirectory + videoUri.split('/').pop(),
+      []
+    );
 
     const opacity = useSharedValue(0);
     const scale = useSharedValue(0);
 
     useEffect(() => {
       async function loadVideo() {
-        const video = FileSystem.cacheDirectory + 'big_buck_bunny.mp4';
+        const videoName = videoUri.split('/').pop();
+
+        // const video = FileSystem.cacheDirectory + 'big_buck_bunny.mp4';
+        const video = FileSystem.cacheDirectory + videoName;
         const file = await FileSystem.getInfoAsync(video);
 
         if (file.exists) {
+          console.log('have video');
           setVideoStatus(video);
+          console.log(video);
         } else {
           const downloadResumable = FileSystem.createDownloadResumable(
-            'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
+            videoUri,
+            // 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
             // 'https://example.com/video.mp4',
             video
           );
+          console.log('fetching video');
           const { uri } = await downloadResumable.downloadAsync();
+          console.log('uri', uri);
           setVideoStatus(uri);
         }
       }
+      // async function loadVideo() {
+      //   const videoObject = await FileSystem.getInfoAsync(filePath);
+      //   if (!videoObject.exists) {
+      //     await FileSystem.downloadAsync(videoUri, filePath);
+      //   }
+      // }
       loadVideo();
     }, []);
 
@@ -130,9 +130,11 @@ export const VideoPlayer = React.memo(
         {videoStatus && (
           <Video
             ref={video}
-            source={{ uri: videoStatus }}
+            source={{ uri: videoUri }}
+            // source={{ uri: filePath }}
             resizeMode={ResizeMode.CONTAIN}
             // shouldPlay={playVideo}
+            shouldPlay={true}
             isLooping={true}
             style={styles.video}
             onPlaybackStatusUpdate={setStatus}
@@ -143,6 +145,18 @@ export const VideoPlayer = React.memo(
           style={{ ...StyleSheet.absoluteFillObject }}
           onPress={toggleVideo}
         >
+          {/* Full page loading */}
+          {(!status?.isLoaded || status.isBuffering) && (
+            <View
+              style={{
+                ...StyleSheet.absoluteFillObject,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <ActivityIndicator size='large' color='#fff' />
+            </View>
+          )}
           <Animated.View style={style}>
             {status?.isLoaded ? (
               status?.isPlaying ? (
@@ -170,12 +184,8 @@ export const VideoPlayer = React.memo(
         </View>
 
         <View style={styles.infoContainer}>
-          <Text style={styles.channel}>@channel</Text>
-          <Text>
-            Lorem Ipsum is simply dummy text of the printing and typesetting
-            industry. Lorem Ipsum has been the industry's standard dummy text
-            ever since the 1500s, when an unknown printer took a galley of ...
-          </Text>
+          <Text style={styles.channel}>{title}</Text>
+          <Text>{description}</Text>
         </View>
       </View>
     );

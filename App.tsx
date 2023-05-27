@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { format } from 'date-fns';
 import DATA from './chat-data.json';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -27,11 +27,77 @@ type IItem = {
 
 const App = () => {
   const [inputHeight, setInputHeight] = useState(45);
+  const [data, setData] = useState(DATA);
+  const [newMessage, setNewMessage] = useState('');
+  const sectionListRef = useRef<SectionList | null>(null);
+
+  const addNewMessage = () => {
+    const today = format(new Date(), 'MMMM dd, yyyy');
+
+    let sectionIndex = data.findIndex(
+      (s) => format(new Date(s.title), 'MMMM dd, yyyy') === today
+    );
+    const section = data[sectionIndex];
+    const message = {
+      id: Date.now(),
+      to: parseInt(Math.random() * 10 + '', 10) % 2 === 0 ? true : false,
+      comments: [
+        {
+          comment: newMessage,
+          created_at: new Date().toISOString(),
+        },
+      ],
+    };
+
+    // let itemIndex = -1;
+
+    if (section) {
+      section.data.unshift(message);
+      // itemIndex = section.data.length - 1;
+    } else {
+      data.unshift({
+        title: new Date().toISOString(),
+        data: [message],
+      });
+      // itemIndex = 0;
+      // sectionIndex = data.length - 1;
+    }
+
+    setData((ps) => {
+      console.log(ps);
+
+      return [...ps];
+    });
+
+    setNewMessage('');
+    sectionListRef.current.scrollToLocation({
+      animated: true,
+      itemIndex: 0, // itemIndex,
+      sectionIndex: 0, // sectionIndex,
+    });
+  };
+
+  const onInputFocus = () => {
+    // const sectionIdx = data.length - 1;
+    // const itemIndex = data[sectionIdx].data.length - 1;
+    // sectionListRef.current.scrollToLocation({
+    //   animated: true,
+    //   itemIndex: itemIndex,
+    //   sectionIndex: sectionIdx,
+    // });
+  };
+
+  console.log(newMessage);
+
   return (
     <SafeAreaView style={styles.container}>
       <SectionList
-        sections={DATA}
+        ref={sectionListRef}
+        sections={data}
         showsVerticalScrollIndicator={false}
+        onEndReached={() => {
+          console.log('END REACHED');
+        }}
         keyExtractor={(index) => index.id.toString()}
         renderItem={({ item }) => (
           <View
@@ -70,6 +136,7 @@ const App = () => {
         //   <Text style={styles.header}>{title}</Text>
         // )}
         renderSectionFooter={({ section: { title } }) => (
+          // renderSectionHeader={({ section: { title } }) => (
           <View style={styles.center}>
             <Text style={styles.header}>
               {format(new Date(title), 'MMMM dd, yyyy')}
@@ -94,6 +161,8 @@ const App = () => {
             paddingHorizontal: 8,
             paddingVertical: 8,
           }}
+          onFocus={onInputFocus}
+          value={newMessage}
           numberOfLines={5}
           cursorColor='darkblue'
           returnKeyType='none'
@@ -104,12 +173,7 @@ const App = () => {
               Math.min(Math.max(event.nativeEvent.contentSize.height, 45), 120)
             );
           }}
-          onChange={(event) => {
-            // this.setState({
-            //   text: event.nativeEvent.text,
-            //   height: event.nativeEvent.contentSize.height,
-            // });
-          }}
+          onChangeText={setNewMessage}
         />
         <TouchableOpacity
           style={{
@@ -120,6 +184,7 @@ const App = () => {
             borderRadius: 45,
             paddingLeft: 4,
           }}
+          onPress={addNewMessage}
         >
           <MaterialIcons name='send' size={24} color='white' />
         </TouchableOpacity>
